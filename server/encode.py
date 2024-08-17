@@ -1,4 +1,5 @@
 import towhee
+import os
 
 
 class Resnet50:
@@ -16,4 +17,5 @@ class Resnet50:
                      .image_embedding.timm(model_name='resnet50') \
                      .tensor_normalize() \
                      .to_list()
+        os.remove(img_path)
         return feat[0]
