@@ -29,7 +29,7 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
 
 ### 1.创建集合
 
-不同集合对应不同的图片数据集合
+不同集合对应不同的图片数据集合，类似数据库中的“表”的概念
 
 #### Request
 
@@ -64,10 +64,10 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
 
 ```json
 {
- "collection": "必须，test",//string，必须，集合，类似mysql中的表，add前请先创建
+ "collection": "test",//string，必须，集合，类似mysql中的表，add前请先创建
  "fileid":0,//int64，文件ID，必须，主键，如果milvus里存在相同的值，则再次Add会覆盖
  "itemid":0,//int64，"必须，物品ID,int64,一个物品ID可以包含多张图片(fileid),搜索的时候，会过滤重复的
- "image": "base64（和url二选一，image优先级更高） ",//string，base64的图片数据，和url二选一，image优先级更高
+ "image": "base64数据",//string，base64的图片数据，和url二选一，image优先级更高
  "url":"http:///xxx.jpp",//string
  "tags": ["String"],//Array，可选，自定义标签，可以用于filter
  "brief":{},//Dict，可选，自定义属性，可以用于filter
@@ -88,7 +88,7 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
 
 ### 3.更新图片
 
-更新图片支持 base64 和url，根据id进行更新
+更新图片支持 base64 和url，根据fileid进行更新
 
 #### Request
 
@@ -102,7 +102,7 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
  "collection": "必须，test",//string，必须，集合，类似mysql中的表，add前请先创建
  "fileid":0,//int64，文件ID，必须，主键，如果milvus里存在相同的值，则再次Add会覆盖
  "itemid":0,//int64，"必须，物品ID,int64,一个物品ID可以包含多张图片(fileid),搜索的时候，会过滤重复的
- "image": "base64（和url二选一，image优先级更高） ",//string，base64的图片数据，和url二选一，image优先级更高
+ "image": "base64数据",//string，base64的图片数据，和url二选一，image优先级更高
  "url":"http:///xxx.jpp",//string
  "tags": ["String"],//Array，可选，自定义标签，可以用于filter
  "brief":{},//Dict，可选，自定义属性，可以用于filter
@@ -167,7 +167,6 @@ distance 越小相似度越高。
 
 ### 5.计算总数
 
-根据fileid删除
 
 #### Request
 
@@ -182,13 +181,13 @@ distance 越小相似度越高。
 
 ```json
 {
-    "code": 10000,
-    "message": "Successfully",
+	"code": 10000,
+	"message": "Successfully",
 	"data": 3
 }
 ```
 
-### 5.删除图片
+### 6.删除图片
 
 根据fileid删除
 
@@ -210,7 +209,7 @@ distance 越小相似度越高。
 }
 ```
 
-### 6.删除整个数据集
+### 7.删除整个数据集
 
 删除milvus集合，这个接口慎用，数据会全部清除。
 
@@ -236,9 +235,9 @@ distance 越小相似度越高。
 
 ### 环境安装
 
-首先我们先有如下环境 python3，mysql，Milvus 
+首先我们先有如下环境 python3，Milvus 
 
-python3，mysql就不多说了
+python3，就不多说了
 
 Milvus  参考 https://milvus.io/docs/v2.1.x/install_standalone-docker.md
 
