@@ -69,9 +69,8 @@ class MilvusHelper:
         mr = self.collection.upsert(data)
         ids = mr.primary_keys
         self.collection.load()
-        LOGGER.debug(
-                f"Insert vectors to Milvus in collection: {collection_name} with {len(data)} rows")
-        return ids
+        LOGGER.debug(f"Insert vectors to Milvus in collection: {collection_name} with {len(data)} rows")
+        return ids[0]
 
     def create_index(self, collection_name):
         # Create IVF_FLAT index on milvus collection
