@@ -27,7 +27,7 @@ def down_image(base64_image, url, upload_path):
     # 图片去除背景,将图片变成固定尺寸
     image_url_r = img_path+"_r"
     resize_image(img_path,image_url_r,448,448)
-    # os.remove(img_path)
+    os.remove(img_path)
     return image_url_r
 
 import rembg
