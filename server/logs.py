@@ -105,6 +105,7 @@ class MultiprocessHandler(logging.FileHandler):
 
 def write_log():
     logger = logging.getLogger()
+    #logger.setLevel(logging.WARNING)
     logger.setLevel(logging.DEBUG)
     # formatter = '%(asctime)s ｜ %(levelname)s ｜ %(filename)s ｜ %(funcName)s ｜ %(module)s ｜ %(lineno)s ｜ %(message)s'
     fmt = logging.Formatter(

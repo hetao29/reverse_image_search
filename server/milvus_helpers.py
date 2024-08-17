@@ -45,10 +45,14 @@ class MilvusHelper:
         # Create milvus collection if not exists
         try:
             if not self.has_collection(collection_name):
-                field1 = FieldSchema(name="id", dtype=DataType.INT64, descrition="int64", is_primary=True, auto_id=True)
-                field2 = FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, descrition="float vector",
-                                     dim=VECTOR_DIMENSION, is_primary=False)
-                schema = CollectionSchema(fields=[field1, field2], description="collection description")
+                fields = [
+                        FieldSchema(name="fileid", dtype=DataType.INT64, descrition="int64", is_primary=True),
+                        FieldSchema(name="vectors", dtype=DataType.FLOAT_VECTOR, descrition="float vector", dim=VECTOR_DIMENSION, is_primary=False),
+                        FieldSchema(name="itemid", dtype=DataType.INT64),
+                        FieldSchema(name="tags", dtype=DataType.ARRAY, element_type=DataType.VARCHAR, max_capacity=10, max_length=240),
+                        FieldSchema(name="brief", dtype=DataType.JSON)
+                        ]
+                schema = CollectionSchema(fields, description="collection description")
                 self.collection = Collection(name=collection_name, schema=schema)
                 LOGGER.debug(f"Create Milvus collection: {collection_name}")
             else:
@@ -56,18 +60,17 @@ class MilvusHelper:
             return "OK"
         except Exception as e:
             LOGGER.error(f"Failed to load data to Milvus: {e}")
-            # sys.exit(1)
             raise e
 
     def insert(self, collection_name, vectors):
         # Batch insert vectors to milvus collection
-        data = [vectors]
         self.set_collection(collection_name)
-        mr = self.collection.insert(data)
+        data = [vectors]
+        mr = self.collection.upsert(data)
         ids = mr.primary_keys
         self.collection.load()
         LOGGER.debug(
-                f"Insert vectors to Milvus in collection: {collection_name} with {len(vectors)} rows")
+                f"Insert vectors to Milvus in collection: {collection_name} with {len(data)} rows")
         return ids
 
     def create_index(self, collection_name):
@@ -77,7 +80,8 @@ class MilvusHelper:
             if self.collection.has_index():
                 return None
             default_index = {"index_type": "IVF_SQ8", "metric_type": METRIC_TYPE, "params": {"nlist": 16384}}
-            status = self.collection.create_index(field_name="embedding", index_params=default_index, timeout=60)
+            self.collection.create_index(field_name="itemid")
+            status = self.collection.create_index(field_name="vectors", index_params=default_index, timeout=60)
             if not status.code:
                 LOGGER.debug(
                     f"Successfully create index in collection:{collection_name} with param:{default_index}")
@@ -101,14 +105,14 @@ class MilvusHelper:
             #  # sys.exit(1)
             raise e
 
-    def search_vectors(self, collection_name, vectors, top_k):
+    def search_vectors(self, item, vectors):
         # Search vector in milvus collection
         try:
-            self.set_collection(collection_name)
-            search_params = {"metric_type": METRIC_TYPE, "params": {"nprobe": 16}}
+            self.set_collection(item.collection)
+            search_params = {"metric_type": METRIC_TYPE, "params": {"nprobe": 16}, "offset": item.offset}
             # data = [vectors]n
-            res = self.collection.search(vectors, anns_field="embedding", param=search_params, limit=top_k)
-            LOGGER.debug(f"Successfully search in collection: {res}")
+            res = self.collection.search(vectors, anns_field="vectors", param=search_params, limit=item.limit, expr=item.filter, output_fields=["fileid","itemid","tags","brief"], group_by_field="itemid")
+            LOGGER.debug(f"Successfully search in collection: {search_params}, {res}")
             return res
         except Exception as e:
             LOGGER.error(f"Failed to search vectors in Milvus: {e}")
@@ -125,7 +129,6 @@ class MilvusHelper:
             return num
         except Exception as e:
             LOGGER.error(f"Failed to count vectors in Milvus: {e}")
-            #  # sys.exit(1)
             raise e
 
     def delete(self, collection_name, expr):

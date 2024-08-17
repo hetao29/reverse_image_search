@@ -1,26 +1,28 @@
 import sys
+import json
 
 sys.path.append("..")
-from config import DEFAULT_TABLE
-from util import commen_util
+from config import DEFAULT_COLLECTION
 
-def do_update(uploadImagesModel, img_path, model, milvus_client, mysql_cli):
-    table_name = uploadImagesModel.table
-    if not table_name:
-        table_name = DEFAULT_TABLE
-    # 删除原有milvus 数据
-    ms_data = mysql_cli.search_by_ids( [uploadImagesModel.id],table_name)
-    if len(ms_data) == 0:
-        raise Exception("id not exist")
-    milvus_client.delete(table_name, "id in [%s]" % ms_data[0][1])
+def do_update(uploadImagesModel, img_path, model, milvus_client):
+    collection = uploadImagesModel.collection
+    if not collection:
+         collection = DEFAULT_COLLECTION
 
     feat = model.resnet50_extract_feat(img_path)
-    ids = milvus_client.insert(table_name, [feat])
-    # milvus_client.create_index(table_name)
-
+    record = {
+            'vectors': feat,
+            'fileid': uploadImagesModel.fileid,
+            'itemid': uploadImagesModel.itemid,
+            'tags': uploadImagesModel.tags,
+            'brief': uploadImagesModel.brief,
+            }
+    if uploadImagesModel.tags is None:
+        record['tags'] = []
+    if uploadImagesModel.brief is None:
+        record['brief'] = {}
     try:
-        # mysql_cli.create_mysql_table(table_name)
-        return mysql_cli.update(table_name, (ids[0], uploadImagesModel.tags, uploadImagesModel.brief,commen_util.obj_encode(feat),uploadImagesModel.id))
+        return milvus_client.insert(collection, record)
     except Exception as e:
-        milvus_client.delete(table_name, "id in [%s]" % ids[0])
+        milvus_client.delete(collection, "fileid in [%s]" % ids[0])
         raise e
