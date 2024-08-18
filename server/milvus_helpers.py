@@ -110,7 +110,7 @@ class MilvusHelper:
             self.set_collection(item.collection)
             search_params = {"metric_type": METRIC_TYPE, "params": {"nprobe": 16}, "offset": item.offset}
             # data = [vectors]n
-            res = self.collection.search(vectors, anns_field="vectors", param=search_params, limit=item.limit, expr=item.filter, output_fields=["fileid","itemid","tags","brief"], group_by_field="itemid")
+            res = self.collection.search(vectors, anns_field="vectors", param=search_params, limit=item.limit, expr=item.filter, output_fields=["fileid","itemid","tags","brief"])
             LOGGER.debug(f"Successfully search in collection: {search_params}, {res}")
             return res
         except Exception as e:
