@@ -233,13 +233,14 @@ distance 越小相似度越高。
 
 ## 快速实践
 
-### 环境安装
 
-首先我们先有如下环境 python3，Milvus 
+### 安装Miluvs
 
-python3，就不多说了
+首先安装 Miluvs ，可以参考 https://milvus.io/docs/v2.1.x/install_standalone-docker.md
 
-Milvus  参考 https://milvus.io/docs/v2.1.x/install_standalone-docker.md
+### 安装本系统
+
+可以参考 https://github.com/hetao29/reverse-image-search 进行Docker部署安装
 
 ### 源码
 
@@ -259,14 +260,6 @@ MILVUS_HOST = os.getenv("MILVUS_HOST", "127.0.0.1")
 MILVUS_PORT = int(os.getenv("MILVUS_PORT", "19530"))
 VECTOR_DIMENSION = int(os.getenv("VECTOR_DIMENSION", "2048"))
 METRIC_TYPE = os.getenv("METRIC_TYPE", "L2")
-DEFAULT_COLLECTION = os.getenv("DEFAULT_COLLECTION", "milvus_img_search")
-
-############### Data Path ###############
-UPLOAD_PATH = os.getenv("UPLOAD_PATH", "tmp/search-images")
-DATE_FORMAT = os.getenv("DATE_FORMAT", "%Y-%m-%d %H:%M:%S")
-
-############### Number of log files ###############
-LOGS_NUM = int(os.getenv("logs_num", "0"))
 
 ```
 
