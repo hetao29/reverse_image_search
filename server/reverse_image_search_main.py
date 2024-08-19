@@ -9,7 +9,6 @@ import json
 from typing import Optional, List, Optional, Any
 
 import uvicorn
-from config import UPLOAD_PATH
 from encode import Resnet50
 from fastapi import FastAPI
 from logs import LOGGER
@@ -39,12 +38,6 @@ app.add_middleware(
 MODEL = Resnet50()
 MILVUS_CLI = MilvusHelper()
 
-# Mkdir '/tmp/search-images'
-if not os.path.exists(UPLOAD_PATH):
-    os.makedirs(UPLOAD_PATH)
-    LOGGER.info(f"mkdir the path:{UPLOAD_PATH}")
-
-
 class UploadImagesModel(BaseModel):
     collection: str
     itemid: int
@@ -63,7 +56,7 @@ async def upload_images(imagesModel: UploadImagesModel):
         return {'code': 10100, 'message': 'collection does not exist, please call "/milvus/img/collection" first'}
     try:
         # Save the upload image to server.
-        img_path = image_util.down_image(imagesModel.image, imagesModel.url, UPLOAD_PATH)
+        img_path = image_util.down_image(imagesModel.image, imagesModel.url)
 
         ms_id = do_upload(imagesModel, img_path, MODEL, MILVUS_CLI)
         LOGGER.info(f"Successfully uploaded data, vector fileid: {ms_id}")
@@ -83,7 +76,7 @@ async def update_images(imagesModel: UploadImagesModel):
         if imagesModel.fileid is None:
             return {'code': 10100, 'message': 'fileid are required'}
 
-        img_path = image_util.down_image(imagesModel.image, imagesModel.url, UPLOAD_PATH)
+        img_path = image_util.down_image(imagesModel.image, imagesModel.url)
 
         ms_id = do_update(imagesModel, img_path, MODEL, MILVUS_CLI)
         LOGGER.info(f"Successfully updated data, vector fileid: {ms_id}")
@@ -127,7 +120,7 @@ async def search_images(item: SearchItem):
         return {'code': 10100, 'message': 'collection does not exist, please call "/milvus/img/collection" first'}
     try:
         # Save the upload image to server.
-        img_path = image_util.down_image(item.image, item.url, UPLOAD_PATH)
+        img_path = image_util.down_image(item.image, item.url)
         paths = do_search(item, img_path, MODEL, MILVUS_CLI)
         res = sorted(paths, key=lambda item: item['distance'])
         LOGGER.info(f"Successfully searched similar images!,{res}")

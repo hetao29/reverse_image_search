@@ -2,7 +2,6 @@ import sys
 import json
 
 sys.path.append("..")
-from config import DEFAULT_COLLECTION
 
 def do_upload(uploadImagesModel, img_path, model, milvus_client):
     """
@@ -13,9 +12,6 @@ def do_upload(uploadImagesModel, img_path, model, milvus_client):
     :param milvus_client:
     :return:
     """
-    collection = uploadImagesModel.collection
-    if not collection:
-        collection = DEFAULT_COLLECTION
     feat = model.resnet50_extract_feat(img_path)
     record = {
             'vectors': feat,
@@ -30,6 +26,6 @@ def do_upload(uploadImagesModel, img_path, model, milvus_client):
         record['brief'] = {}
             
     try:
-        return milvus_client.insert(collection, record)
+        return milvus_client.insert(uploadImagesModel.collection, record)
     except Exception as e:
         raise e

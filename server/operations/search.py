@@ -1,11 +1,8 @@
 import sys
 
 sys.path.append("..")
-from config import DEFAULT_COLLECTION
 
 def do_search(item, img_path, model, milvus_client):
-    if not item.collection:
-        item.collection = DEFAULT_COLLECTION
     feat = model.resnet50_extract_feat(img_path)
     vectors = milvus_client.search_vectors(item, [feat])
     res = []

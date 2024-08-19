@@ -2,12 +2,9 @@ import sys
 import json
 
 sys.path.append("..")
-from config import DEFAULT_COLLECTION
 
 def do_update(uploadImagesModel, img_path, model, milvus_client):
     collection = uploadImagesModel.collection
-    if not collection:
-         collection = DEFAULT_COLLECTION
 
     feat = model.resnet50_extract_feat(img_path)
     record = {
