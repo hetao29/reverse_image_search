@@ -72,6 +72,27 @@ class MilvusHelper:
         LOGGER.debug(f"Insert vectors to Milvus in collection: {collection_name} with {len(data)} rows")
         return ids[0]
 
+    def update(self, collection_name, vectors, feat):
+        # Batch update vectors to milvus collection
+        self.set_collection(collection_name)
+        data = self.collection.query(expr=("fileid=="+str(vectors['fileid'])), limit=1, output_fields=["fileid","itemid","tags","brief","vectors"])
+        if len(data) == 0:
+            return 0
+        if vectors['tags'] is not None:
+            data[0]['tags'] = vectors['tags']
+        if vectors['itemid'] is not None:
+            data[0]['itemid'] = vectors['itemid']
+        if vectors['brief'] is not None:
+            data[0]['brief'] = vectors['brief']
+        if feat is not None:
+            data[0]['vectors'] = feat
+
+        mr = self.collection.upsert(data)
+        ids = mr.primary_keys
+        self.collection.load()
+        LOGGER.debug(f"Update Milvus in collection: {collection_name} with {len(data)} rows, data is{data}, pre data is{vectors}")
+        return ids[0]
+
     def create_index(self, collection_name):
         # Create IVF_FLAT index on milvus collection
         try:

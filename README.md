@@ -51,9 +51,18 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
 
 
 
-### 2.新增图片
+### 2.新增或替换图片
 
-新增图片支持 base64 和url新增
+根据fileid新增图片，支持 base64 和url，相同fileid已经在，则会替换数据
+
+参数说明：
+* collection string 必须，集合，类似mysql中的表，add前请先创建
+* fileid int 必须，主键，如果milvus里存在相同的值，则再次Add会完全覆盖
+* itemid int 可选，物品ID,一个物品ID可以包含多张图片(fileid),搜索的时候，会过滤重复的
+* image string base64的图片数据，和url二选一，image优先级更高
+* url string 
+* tags Array 可选，自定义标签，可以用于filter
+* brief Dict 可选，自定义属性，可以用于filter
 
 #### Request
 
@@ -64,13 +73,13 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
 
 ```json
 {
- "collection": "test",//string，必须，集合，类似mysql中的表，add前请先创建
- "fileid":0,//int64，文件ID，必须，主键，如果milvus里存在相同的值，则再次Add会覆盖
- "itemid":0,//int64，"必须，物品ID,int64,一个物品ID可以包含多张图片(fileid),搜索的时候，会过滤重复的
- "image": "base64数据",//string，base64的图片数据，和url二选一，image优先级更高
- "url":"http:///xxx.jpp",//string
- "tags": ["String"],//Array，可选，自定义标签，可以用于filter
- "brief":{},//Dict，可选，自定义属性，可以用于filter
+ "collection": "test",
+ "fileid":0,
+ "itemid":0,
+ "image": "base64数据"
+ "url":"http:///xxx.jpp",
+ "tags": ["String"],
+ "brief":{},
 }
 ```
 
@@ -82,13 +91,23 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
 {
     "code": 10000,
     "message": "Successfully",
-    "data": 8,//  返回数据id"
+    "data": 8, //返回fileid"
 }
 ```
 
-### 3.更新图片
+### 3.部分更新图片或其它字段信息
 
-更新图片支持 base64 和url，根据fileid进行更新
+根据fileid，更新图片(支持 base64 和url)，itemid，tags，brief
+
+注意：可选字段如果不传，则不会更新数据，保留之前的
+
+参数说明：
+* collection string 必须，集合，类似mysql中的表，add前请先创建
+* fileid int 必须，主键，如果更新时，fileid不存在，则会返回0
+* itemid int 可选，是否更新itemid
+* image/url string 可选，是否更新图片矢量信息(详细说明见上面的add参数说明)
+* tags Array 可选
+* brief Dict 可选
 
 #### Request
 
@@ -99,13 +118,13 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
 
 ```json
 {
- "collection": "必须，test",//string，必须，集合，类似mysql中的表，add前请先创建
- "fileid":0,//int64，文件ID，必须，主键，如果milvus里存在相同的值，则再次Add会覆盖
- "itemid":0,//int64，"必须，物品ID,int64,一个物品ID可以包含多张图片(fileid),搜索的时候，会过滤重复的
- "image": "base64数据",//string，base64的图片数据，和url二选一，image优先级更高
- "url":"http:///xxx.jpp",//string
- "tags": ["String"],//Array，可选，自定义标签，可以用于filter
- "brief":{},//Dict，可选，自定义属性，可以用于filter
+ "collection": "test",
+ "fileid":0,
+ "itemid":0,
+ "image": "base64数据",
+ "url":"http:///xxx.jpp",
+ "tags": ["String"],
+ "brief":{},
 }
 ```
 
@@ -117,7 +136,7 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
 {
     "code": 10000,
     "message": "Successfully",
-    "data": "8  返回数据id"
+    "data": 8 //返回fileid"
 }
 ```
 

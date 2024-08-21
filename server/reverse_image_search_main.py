@@ -40,8 +40,8 @@ MILVUS_CLI = MilvusHelper()
 
 class UploadImagesModel(BaseModel):
     collection: str
-    itemid: int
     fileid: int
+    itemid: int
     # （data:image/jpg;base64,） （和url二选一，image优先级更高）
     image: Optional[str] = ""
     url: Optional[str] = ""
@@ -66,8 +66,19 @@ async def upload_images(imagesModel: UploadImagesModel):
         return {'code': 10100, 'message': str(e)}
 
 
+class UpdateImagesModel(BaseModel):
+    collection: str
+    fileid: int
+    itemid: Optional[int] = None
+    # （data:image/jpg;base64,） （和url二选一，image优先级更高）
+    image: Optional[str] = None
+    url: Optional[str] = None
+    # 标识
+    tags : Optional[List[str]] = None
+    brief : Optional[Json[Any]] = None
+
 @app.post('/milvus/img/update')
-async def update_images(imagesModel: UploadImagesModel):
+async def update_images(imagesModel: UpdateImagesModel):
     # Insert the upload image to Milvus/MySQL
     if not MILVUS_CLI.has_collection(imagesModel.collection):
         return {'code': 10100, 'message': 'collection does not exist, please call "/milvus/img/collection" first'}
@@ -76,7 +87,9 @@ async def update_images(imagesModel: UploadImagesModel):
         if imagesModel.fileid is None:
             return {'code': 10100, 'message': 'fileid are required'}
 
-        img_path = image_util.down_image(imagesModel.image, imagesModel.url)
+        img_path = None
+        if (imagesModel.image is not None ) or (imagesModel.url is not None):
+            img_path = image_util.down_image(imagesModel.image, imagesModel.url)
 
         ms_id = do_update(imagesModel, img_path, MODEL, MILVUS_CLI)
         LOGGER.info(f"Successfully updated data, vector fileid: {ms_id}")
