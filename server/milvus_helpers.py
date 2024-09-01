@@ -2,7 +2,6 @@ from config import MILVUS_HOST, MILVUS_PORT, VECTOR_DIMENSION, METRIC_TYPE
 from logs import LOGGER
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
 
-
 class MilvusHelper:
     """
     Say something about the ExampleCalass...
@@ -29,7 +28,6 @@ class MilvusHelper:
                 raise Exception(f"There is no collection named:{collection_name}")
         except Exception as e:
             LOGGER.error(f"Failed to load data to Milvus: {e}")
-            # sys.exit(1)
             raise e
 
     def has_collection(self, collection_name):
@@ -38,7 +36,6 @@ class MilvusHelper:
             return utility.has_collection(collection_name)
         except Exception as e:
             LOGGER.error(f"Failed to load data to Milvus: {e}")
-            # sys.exit(1)
             raise e
 
     def create_collection(self, collection_name):
@@ -68,7 +65,6 @@ class MilvusHelper:
         data = [vectors]
         mr = self.collection.upsert(data)
         ids = mr.primary_keys
-        self.collection.load()
         LOGGER.debug(f"Insert vectors to Milvus in collection: {collection_name} with {len(data)} rows")
         return ids[0]
 
@@ -89,7 +85,6 @@ class MilvusHelper:
 
         mr = self.collection.upsert(data)
         ids = mr.primary_keys
-        self.collection.load()
         LOGGER.debug(f"Update Milvus in collection: {collection_name} with {len(data)} rows, data is{data}, pre data is{vectors}")
         return ids[0]
 
@@ -128,15 +123,21 @@ class MilvusHelper:
     def search_vectors(self, item, vectors):
         # Search vector in milvus collection
         try:
+            # NotExist = 0, NotLoad = 1, Loading = 2, Loaded = 3
+            state = utility.load_state(collection_name=item.collection)
+            if state == 1:
+                LOGGER.debug(f"Collection not loaded and loading: {state}")
+                self.collection.load()
+                utility.wait_for_loading_complete(collection_name=item.collection);
+                LOGGER.debug(f"Loaded collection")
+
             self.set_collection(item.collection)
             search_params = {"metric_type": METRIC_TYPE, "params": {"nprobe": 16}, "offset": item.offset}
-            # data = [vectors]n
             res = self.collection.search(vectors, anns_field="vectors", param=search_params, limit=item.limit, expr=item.filter, output_fields=["fileid","itemid","tags","brief"])
             LOGGER.debug(f"Successfully search in collection: {search_params}, {res}")
             return res
         except Exception as e:
             LOGGER.error(f"Failed to search vectors in Milvus: {e}")
-            # sys.exit(1)
             raise e
 
 

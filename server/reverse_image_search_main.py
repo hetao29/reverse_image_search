@@ -51,7 +51,7 @@ class UploadImagesModel(BaseModel):
 
 @app.post('/milvus/img/add')
 async def upload_images(imagesModel: UploadImagesModel):
-    # Insert the upload image to Milvus/MySQL
+    # Insert the upload image to Milvus
     if not MILVUS_CLI.has_collection(imagesModel.collection):
         return {'code': 10100, 'message': 'collection does not exist, please call "/milvus/img/collection" first'}
     try:
@@ -79,7 +79,7 @@ class UpdateImagesModel(BaseModel):
 
 @app.post('/milvus/img/update')
 async def update_images(imagesModel: UpdateImagesModel):
-    # Insert the upload image to Milvus/MySQL
+    # Update the image to Milvus
     if not MILVUS_CLI.has_collection(imagesModel.collection):
         return {'code': 10100, 'message': 'collection does not exist, please call "/milvus/img/collection" first'}
     try:
@@ -101,7 +101,7 @@ async def update_images(imagesModel: UpdateImagesModel):
 
 @app.post('/milvus/img/delete')
 async def delete_images(fileid: int, collection: str):
-    # Insert the upload image to Milvus/MySQL
+    # Delete the upload image
     if not MILVUS_CLI.has_collection(collection):
         return {'code': 10100, 'message': 'collection does not exist, please call "/milvus/img/collection" first'}
     try:
@@ -128,7 +128,7 @@ class SearchItem(BaseModel):
 
 @app.post('/milvus/img/search')
 async def search_images(item: SearchItem):
-    # Search the upload image in Milvus/MySQL
+    # Search the upload image in Milvus
     if not MILVUS_CLI.has_collection(item.collection):
         return {'code': 10100, 'message': 'collection does not exist, please call "/milvus/img/collection" first'}
     try:
@@ -161,12 +161,12 @@ async def count_images(collection: str):
 
 @app.post('/milvus/collection/drop')
 async def drop_collection(collection: str):
-    # Delete the collection of Milvus and MySQL
+    # Delete the collection of Milvus
     if not MILVUS_CLI.has_collection(collection):
         return {'code': 10100, 'message': 'collection does not exist, please call "/milvus/img/collection" first'}
     try:
         status = do_drop(collection, MILVUS_CLI)
-        LOGGER.info("Successfully drop collections in Milvus and MySQL!")
+        LOGGER.info("Successfully drop collections in Milvus!")
         return {'code': 10000, 'message': 'Successfully', 'data': status}
     except Exception as e:
         LOGGER.error(e)
@@ -174,11 +174,14 @@ async def drop_collection(collection: str):
 
 @app.post('/milvus/collection/create')
 async def create_collection(collection: str):
-    # Delete the collection of Milvus and MySQL
+    # Create the collection of Milvus
+    if MILVUS_CLI.has_collection(collection):
+        LOGGER.info("Failed create exists collection in Milvus!")
+        return {'code': 10100, 'message': 'Failed'}
     try:
         status = do_create(collection, MILVUS_CLI)
-        LOGGER.info("Successfully drop collections in Milvus and MySQL!")
-        return {'code': 10000, 'message': 'Successfully', 'data': status}
+        LOGGER.info("Successfully create collection in Milvus!")
+        return {'code': 10000, 'message': 'Successfully'}
     except Exception as e:
         LOGGER.error(e)
         return {'code': 10100, 'message': str(e)}
