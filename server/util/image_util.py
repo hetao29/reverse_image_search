@@ -27,7 +27,7 @@ def down_image(base64_image, url):
         raise Exception('Image and url are required')
     # 图片去除背景,将图片变成固定尺寸
     image_url_r = img_path+"_r"
-    resize_image(img_path,image_url_r,448,448)
+    resize_image(img_path,image_url_r,1000,1000)
     os.remove(img_path)
     return image_url_r
 
@@ -76,10 +76,6 @@ def resize_image(input_path:str, output_path:str, max_width:int, max_height:int)
         (int(original_image.width * scale), int(original_image.height * scale))
     )
 
-    # # Calculate scaling factors
-    # scale_x = target_width / original_image.width
-    # scale_y = target_height / original_image.height
-
     # Calculate the coordinates to crop the center portion
     left = (resized_image.width- target_width) / 2
     top = (resized_image.height - target_height) / 2
@@ -90,9 +86,8 @@ def resize_image(input_path:str, output_path:str, max_width:int, max_height:int)
     resized_image = resized_image.crop((left, top, right, bottom))
     # 去除背景
     resized_image = rembg.remove(resized_image)
-    # resized_image = Image.open(io.BytesIO(output))
-     # Convert the image to JPEG format
+    # Convert the image to JPEG format
     resized_image = resized_image.convert("RGB")
 
     # Save the result as a JPEG image
-    resized_image.save(output_path, "JPEG")
+    resized_image.save(output_path, "JPEG", quality=100)

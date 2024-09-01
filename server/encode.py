@@ -32,4 +32,5 @@ class Resnet50:
         global_pool = torch.nn.AdaptiveAvgPool2d(1)
         features = global_pool(features)
         features = features.flatten(1)
+        os.remove(img_path)
         return features.squeeze(0).detach().numpy()
