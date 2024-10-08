@@ -16,6 +16,7 @@ from milvus_helpers import MilvusHelper
 from operations.count import do_count
 from operations.create import do_create
 from operations.drop import do_drop
+from operations.get import do_get
 from operations.search import do_search
 from operations.update import do_update
 from operations.upload import do_upload
@@ -116,6 +117,32 @@ async def delete_images(fileid: int, collection: str):
         LOGGER.error(e)
         return {'code': 10100, 'message': str(e)}
 
+
+class GetModel(BaseModel):
+    collection: str
+    fileid: Optional[int] = None
+    itemid: Optional[int] = None
+@app.post('/milvus/img/get')
+async def get_images(getModel: GetModel):
+    # Delete the upload image
+    if not MILVUS_CLI.has_collection(getModel.collection):
+        return {'code': 10100, 'message': 'collection does not exist, please call "/milvus/img/collection" first'}
+    try:
+        # Save the upload image to server.
+        if ((getModel.fileid is None) and (getModel.itemid is None)):
+            return {'code': 10100, 'message': 'fileid or itemid are required'}
+
+        hit = do_get(getModel.fileid, getModel.itemid, getModel.collection, MILVUS_CLI)
+        if hit is None:
+            return {'code': 10100, 'message': 'Failed to get vector'}
+
+        LOGGER.info(f"Successfully get data,  fileid: {getModel.fileid}")
+        d={'code': 10000, 'message': 'Successfully', 'data': hit}
+        json_str = json.dumps(d, indent=4, default=str)
+        return Response(content=json_str, media_type='application/json')
+    except Exception as e:
+        LOGGER.error(e)
+        return {'code': 10100, 'message': str(e)}
 
 class SearchItem(BaseModel):
     collection: str

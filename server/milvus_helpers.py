@@ -158,3 +158,11 @@ class MilvusHelper:
         num = self.collection.delete(expr)
         LOGGER.info(f"Successfully delete the expr:{expr} of the collection:{collection_name}")
         return num
+
+    def get(self, collection_name, expr):
+        # Get the number of milvus collection
+        self.set_collection(collection_name)
+        data = self.collection.query(expr=expr, limit=1, output_fields=["fileid","itemid","tags","brief","vectors"])
+        if len(data) == 0:
+            return None
+        return data[0]

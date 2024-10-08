@@ -184,7 +184,47 @@ Milvus Bootcamp 提供了很多解决方案 ，https://milvus.io/bootcamp/
 
 distance 越小相似度越高。
 
-### 5.计算总数
+### 4.获取单个数据
+
+根据fileid或者itemid获取单个图片的相关数据，包括向量数据
+
+#### Request
+
+- Method: **POST**
+- URL:  ```/milvus/img/get```
+- Headers: Content-Type:application/json
+- Body:
+
+```json
+{
+ "collection": "test",
+ "fileid":0,
+ "itemid":0
+}
+```
+
+#### Response
+
+- Body
+
+```json
+{
+    "code": 10000,
+    "message": "Successfully",
+    "data": [
+        {
+            "fileid": 513552,
+            "itemid": 513552,
+            "tags": [],
+            "brief": {},
+            "vectors": {},
+        },
+    ]
+}
+```
+
+
+### 6.计算总数
 
 
 #### Request
@@ -206,7 +246,7 @@ distance 越小相似度越高。
 }
 ```
 
-### 6.删除图片
+### 7.删除图片
 
 根据fileid删除
 
@@ -228,7 +268,7 @@ distance 越小相似度越高。
 }
 ```
 
-### 7.删除整个数据集
+### 8.删除整个数据集
 
 删除milvus集合，这个接口慎用，数据会全部清除。
 
